@@ -7,6 +7,8 @@ dist
 tests/server/static
 tests/server/static/upload
 
+.history
+
 .local
 # local env files
 .env.local
