@@ -7,13 +7,11 @@
     :onOk="onSubmit"
     :destroyOnClose="true"
   >
-    <div>工作区名称：</div>
-    <a-input placeholder="请输入工作区名称" v-model:value="inputWorkspaceName" />
-    <div style="margin-top: 10px"
-      >当前工作区地图ID: {{ mapId
-      }}<a-button type="primary" style="margin-left: 10px">导入地图</a-button></div
-    >
-    <div style="width:'100%;height:100px;border:1px solid gray;margin-top:10px"></div>
+    <div style="margin-top: 10px">所属用户组：</div>
+    <a-select v-model:value="userGroupAuth" ref="select" style="width: 100%">
+      <a-select-option value="admin">admin</a-select-option>
+      <a-select-option value="user">user</a-select-option>
+    </a-select>
   </BasicModal>
 </template>
 <script lang="ts">
@@ -21,38 +19,39 @@
   import { BasicModal, useModalInner } from '/@/components/Modal';
   import { formModalProps } from '../type';
   import { useMessage } from '/@/hooks/web/useMessage';
+  import { Select } from 'ant-design-vue';
   export default defineComponent({
-    components: { BasicModal },
+    components: { BasicModal, [Select.name]: Select },
     props: formModalProps,
     setup() {
       const isUpdate = ref(true);
-      const inputWorkspaceName = ref<string>('');
-      const mapId = ref<string>('');
+      const userGroup = ref<string>('');
 
       const [register, { closeModal, setModalProps }] = useModalInner(async (data) => {
         isUpdate.value = !!data?.isUpdate;
         if (unref(isUpdate)) {
-          inputWorkspaceName.value = data.record.workspaceName;
-          mapId.value = data.record.mapId;
+          userGroup.value = data.record.userGroup;
         } else {
-          inputWorkspaceName.value = '';
+          userGroup.value = '';
         }
       });
 
       const { createMessage } = useMessage();
 
       const onSubmit = () => {
-        if (!inputWorkspaceName.value) {
-          createMessage.warning('请输入工作区名称');
+        if (!userGroup.value) {
+          createMessage.warning('请选择用户所属用户组');
           return;
         }
-        createMessage.success(
-          `${unref(isUpdate) ? '编辑' : '添加'} ${inputWorkspaceName.value} 成功`,
-        );
+        createMessage.success(`编辑成功`);
         closeModal();
       };
 
-      const getTitle = computed(() => (!unref(isUpdate) ? '新增工作区' : '编辑工作区'));
+      const handleChange = (value: string[]) => {
+        console.log(`selected ${value}`);
+      };
+
+      const getTitle = computed(() => (!unref(isUpdate) ? '新增用户' : '编辑用户'));
 
       return {
         register,
@@ -61,9 +60,11 @@
         setModalProps: () => {
           setModalProps({ title: 'Modal New Title' });
         },
-        inputWorkspaceName,
-        mapId,
+        userGroup,
         getTitle,
+        handleChange,
+        isUpdate,
+        value: ref(['a1', 'b2']),
       };
     },
   });
